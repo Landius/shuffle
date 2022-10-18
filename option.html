@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/option.css">
+    <link rel="shortcut icon" href="/img/icon.svg" type="image/x-icon">
+    <script type="module" src="js/option.js" defer></script>
+    <title>shuffle options</title>
+</head>
+
+<body>
+    <header>
+        <h1>Shuffle</h1>
+    </header>
+    <div id="app">
+        <div id="nav" @click="activeTab">
+            <span class="tab-btn active">proxy</span>
+            <span class="tab-btn">header-editor</span>
+            <span class="tab-btn">setting</span>
+            <span class="tab-btn">about</span>
+        </div>
+        <div id="main">
+            <div id="proxy" class="tab show">
+                <div class="left-panel" @click="showProxyDetail">
+                    <ul class="proxy-list">
+                        <template v-for="(proxyInfo, proxyName) in data.proxies">
+                            <li class="proxy-item" v-if="proxyName !== 'direct'">{{ proxyName }}</li>
+                        </template>
+                    </ul>
+                    <div class="hr"></div>
+                    <ul class="profile-list">
+                        <li class="profile-item" v-for="(profileInfo, profileName) in data.profiles">{{ profileName }}
+                        </li>
+                    </ul>
+                </div>
+                <div class="mid-panel">
+                    <div id="proxy-editor">
+                        <div>
+                            <span>type:</span>
+                            <select v-model="proxyTab.currentProxyInfo.type">
+                                <option value="http">http</option>
+                                <option value="https">https</option>
+                                <option value="socks4">socks4</option>
+                                <option value="socks">socks</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span>host:</span>
+                            <input type="text" v-model="proxyTab.currentProxyInfo.host">
+                        </div>
+                        <div>
+                            <span>port:</span>
+                            <input type="text" v-model="proxyTab.currentProxyInfo.port">
+                        </div>
+                        <div>
+                            <span>username:</span>
+                            <input type="text" v-model="proxyTab.currentProxyInfo.username" placeholder="optional">
+                        </div>
+                        <div>
+                            <span>password:</span>
+                            <input type="password" v-model="proxyTab.currentProxyInfo.password" placeholder="optional"
+                                autocomplete="off">
+                        </div>
+                        <div>
+                            <span>proxy DNS:</span>
+                            <input type="checkbox" v-model="proxyTab.currentProxyInfo.proxyDNS">
+                        </div>
+                    </div>
+                    <div id="profile-editor">
+                        <div id="default-proxy">
+                            <span>default proxy:</span>
+                            <select v-model="proxyTab.currentProfileInfo.defaultProxy">
+                                <template v-for="proxyName of proxyNames">
+                                    <option :value="proxyName">{{ proxyName }}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="hr"></div>
+                        <span>rules:</span>
+                        <div id="profile-rules">
+                            <div class="profile-rule" v-for="(rule, index) in proxyTab.currentProfileInfo.rules">
+                                <input type="text" v-model="rule.host">
+                                <select v-model="rule.proxyName">
+                                    <option v-for="proxyName of proxyNames" :value="proxyName">{{ proxyName }}</option>
+                                </select>
+                                <input type="button" :data-index="index" @click="deleteRule" value="delete">
+                            </div>
+                        </div>
+                        <div>
+                            <input type="button" @click="addRule" value="add rule">
+                        </div>
+                    </div>
+                </div>
+                <div class="right-panel">
+                    <ul>
+                        <li @click="renameCurrent">rename</li>
+                        <li @click="deleteCurrent">delete</li>
+                    </ul>
+                    <div class="hr"></div>
+                    <ul>
+                        <li @click="addProxy">add proxy</li>
+                        <li @click="addProfile">add profile</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="header-editor" class="tab"></div>
+            <div id="setting" class="tab">
+                <div>
+                    <input type="checkbox" v-model="data.setting.refresh_after_switch">
+                    reload page after switching proxy or editing rule.
+                </div>
+                <div>
+                    <input type="checkbox" v-model="data.setting.enable_for_extension">
+                    proxy requests from extensions.
+                </div>
+                <div>
+                    <input type="checkbox" v-model="data.setting.enable_logging">
+                    enable logging.
+                </div>
+                <div>
+                    <input type="button" value="import data" @click="importData">
+                    <input type="button" value="export data" @click="exportData">
+                    <input type="file" id="data-file" style="display:none" accept="text/*,.json">
+                </div>
+            </div>
+            <div id="about" class="tab"></div>
+        </div>
+        <div id="operation">
+            <button @click="reload">reload</button>
+            <button @click="apply">apply</button>
+        </div>
+    </div>
+    <footer></footer>
+</body>
+
+</html>
