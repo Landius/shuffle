@@ -129,11 +129,11 @@ async function main() {
                     alert('this name is used.');
                 } else {
                     let newProfile = {
-                        dedfaultProxy: 'direct',
+                        defaultProxy: 'direct',
                         rules: [{ host: 'example.com', proxyName: 'direct' }]
                     };
                     this.data.profiles[name] = newProfile;
-                    setTimeout(() => $('li.profile-item:last-child').click(), 0);
+                    setTimeout(() => $('li.profile-item:last-child').click(), 10);
                 }
             },
             importData() {
