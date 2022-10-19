@@ -80,13 +80,16 @@
                         </div>
                         <div class="hr"></div>
                         <span>rules:</span>
-                        <div id="profile-rules">
-                            <div class="profile-rule" v-for="(rule, index) in proxyTab.currentProfileInfo.rules">
-                                <input type="text" v-model="rule.host">
-                                <select v-model="rule.proxyName">
-                                    <option v-for="proxyName of proxyNames" :value="proxyName">{{ proxyName }}</option>
-                                </select>
-                                <input type="button" :data-index="index" @click="deleteRule" value="delete">
+                        <div class="table-container">
+                            <div id="profile-rules">
+                                <div class="profile-rule" v-for="(rule, index) in proxyTab.currentProfileInfo.rules">
+                                    <input type="text" v-model="rule.host">
+                                    <select v-model="rule.proxyName">
+                                        <option v-for="proxyName of proxyNames" :value="proxyName">{{ proxyName }}
+                                        </option>
+                                    </select>
+                                    <input type="button" :data-index="index" @click="deleteRule" value="delete">
+                                </div>
                             </div>
                         </div>
                         <div>
