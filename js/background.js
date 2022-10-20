@@ -58,6 +58,7 @@ function updateIcon() {
         .query({ active: true, currentWindow: true })
         .then(tabs => {
             const activeTab = tabs[0];
+            log.log('updateIcon() activeTab:', activeTab);
             const currentProxy = getProxyByUrl(activeTab.url);
             const iconState = currentProxy.proxyName === 'direct' ? 'NORMAL' : 'ACTIVE';
             if (g.iconState !== iconState) {
@@ -72,19 +73,32 @@ function updateIcon() {
         .catch(err => log.error(err));
 }
 
+function tabUpdateHandler(tabId, changeInfo, tabInfo) {
+    if (tabInfo.active === true && changeInfo.status) {
+        if (changeInfo.status === 'complete' || (changeInfo.status === 'loading' && changeInfo.url)) {
+            updateIcon();
+        }
+    }
+}
+
 function proxyHandler(requestInfo) {
     log.log('proxyHandler(requestInfo)', requestInfo);
 
     let proxyInfo;
-    if (requestInfo.documentUrl?.startsWith('moz-extension://') && g.data.setting.enable_for_extension === false) {
-        // don't forward request from extension
+    if (requestInfo.documentUrl?.startsWith('moz-ext') && g.data.setting.enable_for_extension === false) {
+        // for extension
         proxyInfo = g.data.proxies['direct'];
     } else if (g.data.active.type === 'proxy') {
         // use proxy
         proxyInfo = g.data.proxies[g.data.active.name];
     } else {
         // use profile
-        let url = requestInfo.documentUrl || requestInfo.url;
+        let url;
+        if(requestInfo.tabId === -1 || requestInfo.documentUrl === 'about:blank'){
+            url = requestInfo.url;
+        }else{
+            url = requestInfo.documentUrl || requestInfo.url;
+        }
         proxyInfo = getProxyByUrl(url).proxyInfo;
     }
 
@@ -96,7 +110,7 @@ function getProxyByUrl(url) {
     const host = new URL(url).host;
     const ret = {
         // store search result
-        hostLength: 0,
+        matchedLength: 0,
         proxyName: profile.defaultProxy
     };
 
@@ -105,8 +119,9 @@ function getProxyByUrl(url) {
             // fully match
             ret.proxyName = rule.proxyName;
             break;
-        } else if (host.endsWith(rule.host) && rule.host.length > ret.hostLength) {
-            // partial match, long rule host has higher priority
+        } else if (host.endsWith(rule.host) && rule.host.length > ret.matchedLength) {
+            // partial match, longer rule host has higher priority
+            ret.matchedLength = rule.host.length;
             ret.proxyName = rule.proxyName;
         }
     }
@@ -205,6 +220,7 @@ function msgHandler(msg, sender, sendResponse) {
         case 'setData':
             g.data = msg.data;
             storage.set(g.data).then(sendResponse);
+            switchListeners();
             break;
         case 'getActiveTab':
             sendResponse(g.activeTab);
@@ -297,16 +313,20 @@ function switchListeners() {
 
     // switch proxy handler
     if (setting.enable_proxy === true && proxyEnabled === false) {
+        // proxy on
         browser.proxy.onRequest.addListener(proxyHandler, { urls: ['<all_urls>'] });
         browser.webRequest.onAuthRequired.addListener(proxyAuthHandler, { urls: ['<all_urls>'] }, ['blocking']);
         // use different icon to indicate proxy state
-        browser.tabs.onActivated.addListener(updateIcon); // maybe use changeInfo.attention of onUpdated is better?
+        browser.tabs.onUpdated.addListener(tabUpdateHandler);
+        browser.tabs.onActivated.addListener(updateIcon);
         browser.windows.onFocusChanged.addListener(updateIcon);
         updateIcon();
     } else if (setting.enable_proxy === false && proxyEnabled === true) {
+        // proxy off
         browser.proxy.onRequest.removeListener(proxyHandler);
         browser.webRequest.onAuthRequired.removeListener(proxyAuthHandler);
         // disable dynamic toolbar icon
+        browser.tabs.onUpdated.removeListener(tabUpdateHandler);
         browser.tabs.onActivated.removeListener(updateIcon);
         browser.windows.onFocusChanged.removeListener(updateIcon);
         browser.browserAction.setIcon(icon['NORMAL']);
@@ -314,6 +334,7 @@ function switchListeners() {
 
     // switch request & response header modifier
     if (setting.enable_modifier === true && modifierEnabled === false) {
+        // modifier on
         browser.webRequest.onBeforeSendHeaders.addListener(applyRequestModifiers, { urls: ['<all_urls>'] }, [
             'blocking',
             'requestHeaders'
@@ -323,15 +344,18 @@ function switchListeners() {
             'responseHeaders'
         ]);
     } else if (setting.enable_modifier === false && modifierEnabled === true) {
+        // modifier off
         browser.webRequest.onBeforeSendHeaders.removeListener(applyRequestModifiers);
         browser.webRequest.onHeadersReceived.removeListener(applyResponseModifiers);
     }
 
     // switch error logger
     if (setting.enable_logging === true && loggingEnabled === false) {
+        // logger on
         browser.proxy.onError.addListener(proxyErrorHandler);
         browser.webRequest.onErrorOccurred.addListener(webRequestErrorHandler, { urls: ['<all_urls>'] });
     } else if (setting.enable_logging === false && loggingEnabled === true) {
+        // logger off
         browser.proxy.onError.removeListener(proxyErrorHandler);
         browser.webRequest.onErrorOccurred.removeListener(webRequestErrorHandler);
     }

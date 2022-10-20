@@ -7,7 +7,9 @@
 
 ## todo
 
-- [ ] fix url='about:blank'
+- [x] fix url='about:blank'
+- [ ] add reset data btn
+- [ ] improve reload btn
 - [x] option page: different section for proxy, header editor
 - [x] header editor
   - [x] background
@@ -26,3 +28,7 @@ Not all headers actually sent are always included in requestHeaders. In particul
 Headers modified in webRequest.onHeadersReceived are not displayed in Netmonitor
 [bugzilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1376950)
 [stackoverflow](https://stackoverflow.com/questions/27126197/modify-headers-on-onheadersreceived)
+
+### tabs.onUpdated
+
+changeInfo.attention: Indicates whether the tab is drawing attention. For example, attention is true when the tab displays a modal dialog. **but won't fire on tab activated.**
