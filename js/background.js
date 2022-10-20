@@ -219,8 +219,13 @@ function msgHandler(msg, sender, sendResponse) {
             break;
         case 'setData':
             g.data = msg.data;
-            storage.set(g.data).then(sendResponse);
             switchListeners();
+            storage.set(g.data).then(sendResponse);
+            break;
+        case 'resetData':
+            g.data = defaultData;
+            switchListeners();
+            storage.set(defaultData).then(sendResponse);
             break;
         case 'getActiveTab':
             sendResponse(g.activeTab);

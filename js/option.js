@@ -165,8 +165,15 @@ async function main() {
                 const filename = 'shuffle_data-' + time.getFullYear() + '-' + (time.getMonth()+1) + '-' + time.getDate() + '.json';
                 saveTextFile(text, filename);
             },
+            resetData(){
+                if(confirm('reset extension data?')){
+                    browser.runtime.sendMessage({cmd:'resetData'}).then(()=>window.location.reload());
+                }
+            },
             reload() {
-                window.location.reload();
+                if(confirm('will lost all changes, reload page?')){
+                    window.location.reload();
+                }
             },
             apply() {
                 console.log('save data', JSON.parse(JSON.stringify(this.data)));

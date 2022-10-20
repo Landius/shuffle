@@ -7,13 +7,6 @@
 
 ## todo
 
-- [x] fix url='about:blank'
-- [ ] add reset data btn
-- [ ] improve reload btn
-- [x] option page: different section for proxy, header editor
-- [x] header editor
-  - [x] background
-  - [x] options
 - [ ] popup page
 - [ ] url tester
 
