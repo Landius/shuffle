@@ -109,7 +109,67 @@
                     </ul>
                 </div>
             </div>
-            <div id="header-editor" class="tab"></div>
+            <div id="header-editor" class="tab">
+                <h3>request modifier</h3>
+                <table>
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                    </colgroup>
+                    <tr>
+                        <th>pattern</th>
+                        <th>name</th>
+                        <th>value</th>
+                        <th>enable</th>
+                        <th>delete</th>
+                    </tr>
+                    <tr v-for="(modifier, index) in data.requestModifiers">
+                        <td><input type="text" v-model="modifier.pattern"></td>
+                        <td><input type="text" v-model="modifier.name"></td>
+                        <td><input type="text" v-model="modifier.value"></td>
+                        <td><input type="checkbox" v-model="modifier.enable"></td>
+                        <td><input type="button" value="delete" @click="deleteRequestModifier" :data-index="index"></td>
+                    </tr>
+                </table>
+                <input type="button" @click="addRequestModifier" value="add request modifier">
+                <div class="hr"></div>
+                <h3>response modifier</h3>
+                <table>
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                    </colgroup>
+                    <tr>
+                        <th>pattern</th>
+                        <th>name</th>
+                        <th>value</th>
+                        <th>enable</th>
+                        <th>delete</th>
+                    </tr>
+                    <tr v-for="modifier of data.responseModifiers">
+                        <td><input type="text" v-model="modifier.pattern"></td>
+                        <td><input type="text" v-model="modifier.name"></td>
+                        <td><input type="text" v-model="modifier.value"></td>
+                        <td><input type="checkbox" v-model="modifier.enable"></td>
+                        <td><input type="button" value="delete" @click="deleteResponseModifier"></td>
+                    </tr>
+                </table>
+                <input type="button" @click="addResponseModifier" value="add response modifier">
+                <div class="hr"></div>
+                <p class="note">
+                    Note:
+                    <br>
+                    <b>pattern</b> should be regular expression string.
+                    <br>
+                    if <b>value</b> is empty, corresponding header will be deleted.
+                </p>
+            </div>
             <div id="setting" class="tab">
                 <div>
                     <input type="checkbox" v-model="data.setting.refresh_after_switch">

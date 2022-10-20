@@ -11,7 +11,7 @@
 - [ ] option page: different section for proxy, header editor
 - [ ] header editor
   - [x] background
-  - [ ] options
+  - [x] options
 - [ ] popup page
 - [ ] url tester
 

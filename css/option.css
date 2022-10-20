@@ -75,6 +75,7 @@ h1 {
     display: flex;
 }
 
+#header-editor.tab,
 #setting.tab {
     flex-direction: column;
 }
@@ -117,6 +118,7 @@ h1 {
 div.hr {
     border-top: var(--gray-border);
     margin: 5px auto;
+    width: 100%;
 }
 
 #proxy-editor,
@@ -174,6 +176,15 @@ div.hr {
     margin: .25rem;
     flex: 0 0 4.5rem;
 }
+.profile-rule>input,
+.profile-rule>select{
+    font-size: .9rem;
+}
+
+#header-editor>input[type="button"]{
+    width: min-content;
+    margin-block: 1rem;
+}
 
 #setting>div {
     margin: .5rem;
@@ -202,7 +213,6 @@ textarea {
     border: var(--gray-border);
     outline: none;
     padding: 3px 5px;
-    width: 250px;
     color: #233;
 }
 
@@ -242,4 +252,34 @@ button:active {
 
 #operation>button:active {
     box-shadow: none;
+}
+
+table {
+    border-collapse: collapse !important;
+}
+
+col:nth-child(1) {
+    width: 18rem;
+}
+
+col:nth-child(2) {
+    width: 7rem;
+}
+
+col:nth-child(3) {
+    width: 18rem;
+}
+
+th,
+td {
+    padding: 3px 5px;
+    border: var(--gray-border);
+}
+
+td>input[type="text"],
+td>input[type="checkbox"],
+td>input[type="button"] {
+    font-size: .9rem;
+    width: 100%;
+    margin: auto;
 }

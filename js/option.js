@@ -136,6 +136,24 @@ async function main() {
                     setTimeout(() => $('li.profile-item:last-child').click(), 10);
                 }
             },
+            // for header editor
+            addRequestModifier(){
+                const newModifier = {pattern:"",name:"",value:"",enable:true};
+                this.data.requestModifiers.push(newModifier);
+            },
+            addResponseModifier(){
+                const newModifier = {pattern:"",name:"",value:"",enable:true};
+                this.data.responseModifiers.push(newModifier);
+            },
+            deleteRequestModifier(ev){
+                const index = parseInt(ev.target.dataset.index);
+                this.data.requestModifiers.splice(index, 1);
+            },
+            deleteResponseModifier(ev){
+                const index = parseInt(ev.target.dataset.index);
+                this.data.responseModifiers.splice(index, 1);
+            },
+            // for setting
             importData() {
                 loadTextFile().then(text => {
                     this.data = JSON.parse(text);
