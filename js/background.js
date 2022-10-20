@@ -16,29 +16,27 @@ const defaultData = {
             rules: [{ host: 'example.com', proxyName: 'direct' }]
         }
     },
-    modification: {
-        requestRules: [
-            {
-                pattern: '^https://example.org/$',
-                name: 'User-Agent',
-                value: 'Googlebot/2.1 (+http://www.google.com/bot.html)',
-                enable: true
-            }
-        ],
-        responseRules: [
-            {
-                pattern: '^https://example.org/$',
-                name: 'abc',
-                value: '123',
-                enable: true
-            }
-        ]
-    },
+    requestModifiers: [
+        {
+            pattern: '^https://example.org/$',
+            name: 'User-Agent',
+            value: 'Googlebot/2.1 (+http://www.google.com/bot.html)',
+            enable: true
+        }
+    ],
+    responseModifiers: [
+        {
+            pattern: '^https://example.org/$',
+            name: 'abc',
+            value: '123',
+            enable: true
+        }
+    ],
     setting: {
         enable_proxy: true,
         refresh_after_switch: true,
         enable_for_extension: true,
-        enable_modification: false,
+        enable_modifier: false,
         enable_logging: false
     }
 };
@@ -144,22 +142,22 @@ function proxyAuthHandler(requestDetail) {
     return blockResponse;
 }
 
-function requestModifier(requestDetail) {
+function applyRequestModifiers(requestDetail) {
     const url = requestDetail.url;
     const headers = requestDetail.requestHeaders;
 
-    for (let rule of g.data.modification.requestRules) {
-        if (rule.enable && new RegExp(rule.pattern).test(url)) {
-            const i = headers.findIndex(item => item.name.toLowerCase() === rule.name.toLowerCase());
+    for (let modifier of g.data.requestModifiers) {
+        if (modifier.enable && new RegExp(modifier.pattern).test(url)) {
+            const i = headers.findIndex(item => item.name.toLowerCase() === modifier.name.toLowerCase());
             if (i === -1) {
                 // header not exist
-                headers.push({ name: rule.name, value: rule.value });
-            } else if (rule.value === '') {
+                headers.push({ name: modifier.name, value: modifier.value });
+            } else if (modifier.value === '') {
                 // delete header
                 headers.splice(i, 1);
             } else {
                 // change value
-                headers[i].value = rule.value;
+                headers[i].value = modifier.value;
             }
         }
     }
@@ -167,22 +165,22 @@ function requestModifier(requestDetail) {
     return { requestHeaders: headers };
 }
 
-function responseModifier(responseDetail) {
+function applyResponseModifiers(responseDetail) {
     const url = responseDetail.url;
     const headers = responseDetail.responseHeaders;
 
-    for (let rule of g.data.modification.responseRules) {
-        if (rule.enable && new RegExp(rule.pattern).test(url)) {
-            const i = headers.findIndex(item => item.name.toLowerCase() === rule.name.toLowerCase());
+    for (let modifier of g.data.responseModifiers) {
+        if (modifier.enable && new RegExp(modifier.pattern).test(url)) {
+            const i = headers.findIndex(item => item.name.toLowerCase() === modifier.name.toLowerCase());
             if (i === -1) {
                 // header not exist
-                headers.push({ name: rule.name, value: rule.value });
-            } else if (rule.value === '') {
+                headers.push({ name: modifier.name, value: modifier.value });
+            } else if (modifier.value === '') {
                 // delete header
                 headers.splice(i, 1);
             } else {
                 // change value
-                headers[i].value = rule.value;
+                headers[i].value = modifier.value;
             }
             console.log(headers);
         }
@@ -294,7 +292,7 @@ main();
 function switchListeners() {
     const setting = g.data.setting;
     const proxyEnabled = browser.proxy.onRequest.hasListener(proxyHandler) ? true : false;
-    const modificationEnabled = browser.webRequest.onBeforeSendHeaders.hasListener(requestModifier) ? true : false;
+    const modifierEnabled = browser.webRequest.onBeforeSendHeaders.hasListener(applyRequestModifiers) ? true : false;
     const loggingEnabled = browser.proxy.onError.hasListener(proxyErrorHandler) ? true : false;
 
     // switch proxy handler
@@ -315,18 +313,18 @@ function switchListeners() {
     }
 
     // switch request & response header modifier
-    if (setting.enable_modification === true && modificationEnabled === false) {
-        browser.webRequest.onBeforeSendHeaders.addListener(requestModifier, { urls: ['<all_urls>'] }, [
+    if (setting.enable_modifier === true && modifierEnabled === false) {
+        browser.webRequest.onBeforeSendHeaders.addListener(applyRequestModifiers, { urls: ['<all_urls>'] }, [
             'blocking',
             'requestHeaders'
         ]);
-        browser.webRequest.onHeadersReceived.addListener(responseModifier, { urls: ['<all_urls>'] }, [
+        browser.webRequest.onHeadersReceived.addListener(applyResponseModifiers, { urls: ['<all_urls>'] }, [
             'blocking',
             'responseHeaders'
         ]);
-    } else if (setting.enable_modification === false && modificationEnabled === true) {
-        browser.webRequest.onBeforeSendHeaders.removeListener(requestModifier);
-        browser.webRequest.onHeadersReceived.removeListener(responseModifier);
+    } else if (setting.enable_modifier === false && modifierEnabled === true) {
+        browser.webRequest.onBeforeSendHeaders.removeListener(applyRequestModifiers);
+        browser.webRequest.onHeadersReceived.removeListener(applyResponseModifiers);
     }
 
     // switch error logger
