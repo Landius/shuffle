@@ -110,7 +110,7 @@
                 </div>
             </div>
             <div id="header-editor" class="tab">
-                <h3>request modifier</h3>
+                <h4>Request modifier</h4>
                 <table>
                     <colgroup>
                         <col>
@@ -136,7 +136,7 @@
                 </table>
                 <input type="button" @click="addRequestModifier" value="add request modifier">
                 <div class="hr"></div>
-                <h3>response modifier</h3>
+                <h4>Response modifier</h4>
                 <table>
                     <colgroup>
                         <col>
@@ -171,6 +171,7 @@
                 </p>
             </div>
             <div id="setting" class="tab">
+                <h4>Proxy</h4>
                 <div>
                     <input type="checkbox" v-model="data.setting.refresh_after_switch">
                     reload page after switching proxy or editing rule.
@@ -179,6 +180,12 @@
                     <input type="checkbox" v-model="data.setting.enable_for_extension">
                     proxy requests from extensions.
                 </div>
+                <h4>Header editor</h4>
+                <div>
+                    <input type="checkbox" v-model="data.setting.enable_modifier">
+                    enable header modifiers.
+                </div>
+                <h4>Other</h4>
                 <div>
                     <input type="checkbox" v-model="data.setting.enable_logging">
                     enable logging.

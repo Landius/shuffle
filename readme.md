@@ -8,8 +8,8 @@
 ## todo
 
 - [ ] fix url='about:blank'
-- [ ] option page: different section for proxy, header editor
-- [ ] header editor
+- [x] option page: different section for proxy, header editor
+- [x] header editor
   - [x] background
   - [x] options
 - [ ] popup page
