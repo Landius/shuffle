@@ -49,7 +49,7 @@ const icon = {
 // global variables
 const g = {
     data: null,
-    activeTab: { id: -1, url: '', currentProxy: null, currentActive: null },
+    activeTab: { id: -1, url: '', currentProxy: '', currentActive: null },
     iconState: 'NORMAL'
 };
 
@@ -59,8 +59,16 @@ function updateIcon() {
         .then(tabs => {
             const activeTab = tabs[0];
             log.log('updateIcon() activeTab:', activeTab);
-            const currentProxy = getProxyByUrl(activeTab.url);
-            const iconState = currentProxy.proxyName === 'direct' ? 'NORMAL' : 'ACTIVE';
+            let currentProxy;
+            if (activeTab.url.startsWith('about:')) {
+                currentProxy =
+                    g.data.active.type === 'proxy'
+                        ? g.data.active.name
+                        : g.data.profiles[g.data.active.name].defaultProxy;
+            } else {
+                currentProxy = getProxyByUrl(activeTab.url).proxyName;
+            }
+            const iconState = currentProxy === 'direct' ? 'NORMAL' : 'ACTIVE';
             if (g.iconState !== iconState) {
                 browser.browserAction.setIcon(icon[iconState]);
                 g.iconState = iconState;
@@ -84,51 +92,59 @@ function tabUpdateHandler(tabId, changeInfo, tabInfo) {
 function proxyHandler(requestInfo) {
     log.log('proxyHandler(requestInfo)', requestInfo);
 
+    let url;
     let proxyInfo;
-    if (requestInfo.documentUrl?.startsWith('moz-ext') && g.data.setting.enable_for_extension === false) {
-        // for extension
-        proxyInfo = g.data.proxies['direct'];
-    } else if (g.data.active.type === 'proxy') {
-        // use proxy
-        proxyInfo = g.data.proxies[g.data.active.name];
-    } else {
-        // use profile
-        let url;
-        if(requestInfo.tabId === -1 || requestInfo.documentUrl === 'about:blank'){
+
+    if (requestInfo.documentUrl) {
+        if (requestInfo.documentUrl.startsWith('about:')) {
             url = requestInfo.url;
-        }else{
-            url = requestInfo.documentUrl || requestInfo.url;
+        } else {
+            url = requestInfo.documentUrl;
         }
-        proxyInfo = getProxyByUrl(url).proxyInfo;
+    } else {
+        url = requestInfo.url;
     }
+
+    proxyInfo = getProxyByUrl(url).proxyInfo;
 
     return proxyInfo;
 }
 
 function getProxyByUrl(url) {
-    const profile = g.data.profiles[g.data.active.name];
-    const host = new URL(url).host;
-    const ret = {
-        // store search result
-        matchedLength: 0,
-        proxyName: profile.defaultProxy
-    };
+    let proxyName = 'direct';
+    if (url.startsWith('moz-ext') && g.data.setting.enable_for_extension === false) {
+        // for extension
+        proxyName = 'direct';
+    } else if (g.data.active.type === 'proxy') {
+        // using proxy
+        proxyName = g.data.active.name;
+    } else {
+        // using profile
+        const profile = g.data.profiles[g.data.active.name];
+        const host = new URL(url).host;
+        let matchedLength = 0;
 
-    for (let rule of profile.rules) {
-        if (host === rule.host) {
-            // fully match
-            ret.proxyName = rule.proxyName;
-            break;
-        } else if (host.endsWith(rule.host) && rule.host.length > ret.matchedLength) {
-            // partial match, longer rule host has higher priority
-            ret.matchedLength = rule.host.length;
-            ret.proxyName = rule.proxyName;
+        for (let rule of profile.rules) {
+            if (host === rule.host) {
+                // fully match
+                matchedLength = rule.host.length;
+                proxyName = rule.proxyName;
+                break;
+            } else if (host.endsWith(rule.host) && rule.host.length > matchedLength) {
+                // partial match, longer rule host has higher priority
+                matchedLength = rule.host.length;
+                proxyName = rule.proxyName;
+            }
+        }
+
+        if (matchedLength === 0) {
+            proxyName = profile.defaultProxy;
         }
     }
 
     const result = {
-        proxyName: ret.proxyName,
-        proxyInfo: g.data.proxies[ret.proxyName]
+        proxyName: proxyName,
+        proxyInfo: g.data.proxies[proxyName]
     };
 
     log.log('getProxyByUrl(): ', url, result);
@@ -218,6 +234,7 @@ function msgHandler(msg, sender, sendResponse) {
             sendResponse(g.data);
             break;
         case 'setData':
+            console.log(msg.data);
             g.data = msg.data;
             switchListeners();
             storage.set(g.data).then(sendResponse);
@@ -230,45 +247,9 @@ function msgHandler(msg, sender, sendResponse) {
         case 'getActiveTab':
             sendResponse(g.activeTab);
             break;
-        case 'setActive':
-            g.data.active = msg.active;
-            storage.set(g.data);
-            updateIcon();
-            refreshCurrentTab();
-            break;
-        case 'editRule':
-            editRule(msg.rule);
-            storage.set(g.data);
-            updateIcon();
-            refreshCurrentTab();
-            sendResponse();
-            break;
         default:
             log.warn('msgHandler(), unknow msg:', msg);
             break;
-    }
-}
-
-function editRule(newRule) {
-    const rules = g.data.profiles[g.data.active.name].rules;
-    let ruleExist = false;
-
-    for (let i = 0; i < rules.length; i++) {
-        if ((rules[i].host = newRule.host)) {
-            ruleExist = true;
-            rules[i].proxyName = newRule.proxyName;
-            break;
-        }
-    }
-
-    if (ruleExist === false) {
-        rules.push(newRule);
-    }
-}
-
-function refreshCurrentTab() {
-    if (g.activeTab.id !== -1 && g.setting.refresh_after_switch) {
-        browser.tabs.reload(g.activeTab.id);
     }
 }
 

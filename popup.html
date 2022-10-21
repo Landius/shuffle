@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="js/popup.js" defer></script>
+    <link rel="stylesheet" href="css/popup.css">
+    <title>shuffle popup</title>
+</head>
+
+<body>
+    <div id="app" style="display: none;">
+        <div id="proxy-info" class="panel">
+            <table id="info-table" v-show="currentTable === 'info'">
+                <tr>
+                    <th>host:</th>
+                    <td>{{ host }}</td>
+                </tr>
+                <tr>
+                    <th>status:</th>
+                    <td>{{ status }}</td>
+                </tr>
+            </table>
+            <table id="edit-table" v-show="currentTable === 'edit'">
+                <tr>
+                    <th>host: </th>
+                    <td><input type="text" v-model="host"></td>
+                </tr>
+                <tr>
+                    <th>proxy: </th>
+                    <td><select v-model="this.activeTab.currentProxy">
+                            <option v-for="(proxyInfo, proxyName) in data.proxies" :value="proxyName">{{proxyName}}
+                            </option>
+                        </select></td>
+                </tr>
+            </table>
+            <table id="switch-table" v-show="currentTable === 'switch'">
+                <tr>
+                    <th>proxies:</th>
+                    <td>
+                        <select @change="switchProxy" value="">
+                            <option v-for="(proxyInfo, proxyName) in data.proxies" :value="proxyName">{{proxyName}}
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>profiles:</th>
+                    <td>
+                        <select @change="switchProfile" value="">
+                            <option v-for="(profile, profileName) in data.profiles" :value="profileName">{{profileName}}
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="btn-container">
+            <button @click="editHandler" v-show="showEditBtn">edit</button>
+            <button @click="saveHandler" v-show="showSaveBtn">save</button>
+            <button @click="switchHandler">switch</button>
+            <button @click="optionHandler">option</button>
+        </div>
+    </div>
+</body>
+
+</html>

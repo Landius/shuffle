@@ -7,7 +7,7 @@
 
 ## todo
 
-- [ ] popup page
+- [ ] option page: h4 to table caption
 - [ ] url tester
 
 ## note
