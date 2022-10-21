@@ -173,11 +173,15 @@
             <div id="setting" class="tab">
                 <h4>Proxy</h4>
                 <div>
-                    <input type="checkbox" v-model="data.setting.refresh_after_switch">
+                    <input type="checkbox" v-model="data.setting.enable_proxy">
+                    enable proxy.
+                </div>
+                <div>
+                    <input type="checkbox" :disabled="!data.setting.enable_proxy" v-model="data.setting.refresh_after_switch">
                     reload page after switching proxy or editing rule.
                 </div>
                 <div>
-                    <input type="checkbox" v-model="data.setting.enable_for_extension">
+                    <input type="checkbox" :disabled="!data.setting.enable_proxy" v-model="data.setting.enable_for_extension">
                     proxy requests from extensions.
                 </div>
                 <h4>Header editor</h4>
@@ -197,7 +201,11 @@
                     <input type="file" id="data-file" style="display:none" accept="text/*,.json">
                 </div>
             </div>
-            <div id="about" class="tab"></div>
+            <div id="about" class="tab">
+                <p class="note">
+                    shuffle {{ version }}
+                </p>
+            </div>
         </div>
         <div id="operation">
             <button @click="reload">reload</button>

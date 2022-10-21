@@ -186,6 +186,9 @@ async function main() {
         computed: {
             proxyNames() {
                 return Object.keys(this.data.proxies);
+            },
+            version(){
+                return browser.runtime.getManifest().version;
             }
         },
         mounted() {
