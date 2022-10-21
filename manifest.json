@@ -2,8 +2,8 @@
 
   "manifest_version": 2,
   "name": "shuffle",
-  "description": "A firefox addon that helps with switching proxies by hostname",
-  "version": "1.0",
+  "description": "switch proxy, edit header",
+  "version": "1.1",
 
   "icons": { "96": "img/icon.png" },
 

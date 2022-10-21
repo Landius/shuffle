@@ -1,4 +1,4 @@
-import { createApp } from './lib/vue.esm-browser.js';
+import { createApp } from './lib/vue.esm-browser.prod.min.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
