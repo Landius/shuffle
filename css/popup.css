@@ -1,12 +1,15 @@
 :root {
     font-size: 14px;
+    font-family: sans-serif;
     color: #233;
 }
 
 #proxy-info {
     border-radius: 3px;
+    border: 1px solid #0005;
     padding: 3px;
-    box-shadow: 0 0 2px 0 #0005;
+    box-shadow: 1px 1px 2px 0 #0003;
+    background-color: #f8fff8;
 }
 
 table {
@@ -43,12 +46,12 @@ th {
 
 #btn-container {
     display: flex;
+    gap: .5rem;
     margin: .5rem 0 0 0;
 }
 
 #btn-container>button {
     flex: 1 1 auto;
-    margin: 3px;
 }
 
 select,
@@ -57,11 +60,18 @@ button {
 }
 
 button {
+    padding: 3px 5px;
     border-radius: 3px;
     border: 1px solid #0005;
     cursor: pointer;
+    background-color: #0001;
+    transition-duration: 100ms;
     outline: none;
-    /* box-shadow: 0 0 2px 0 #0005; */
+    box-shadow: 1px 1px 1px 0 #0003;
+}
+
+button:hover{
+    background-color: #0002;
 }
 
 button:active {

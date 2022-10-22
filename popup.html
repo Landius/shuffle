@@ -40,7 +40,7 @@
                 <tr>
                     <th>proxies:</th>
                     <td>
-                        <select @change="switchProxy" value="">
+                        <select @change="switchProxy" :value="activeProxy">
                             <option v-for="(proxyInfo, proxyName) in data.proxies" :value="proxyName">{{proxyName}}
                             </option>
                         </select>
@@ -49,7 +49,7 @@
                 <tr>
                     <th>profiles:</th>
                     <td>
-                        <select @change="switchProfile" value="">
+                        <select @change="switchProfile" :value="activeProfile">
                             <option v-for="(profile, profileName) in data.profiles" :value="profileName">{{profileName}}
                             </option>
                         </select>
@@ -60,7 +60,7 @@
         <div id="btn-container">
             <button @click="editHandler" v-show="showEditBtn">edit</button>
             <button @click="saveHandler" v-show="showSaveBtn">save</button>
-            <button @click="switchHandler">switch</button>
+            <button @click="switchHandler" v-show="showSwitchBtn">switch</button>
             <button @click="optionHandler">option</button>
         </div>
     </div>

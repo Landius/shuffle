@@ -14,7 +14,7 @@ async function main() {
             let host;
             if (activeTab.url.startsWith('moz-ext')) {
                 host = 'extension page';
-            } else if(activeTab.url.startsWith('about:')){
+            } else if (activeTab.url.startsWith('about:')) {
                 host = 'about page';
             } else {
                 const url = new URL(activeTab.url);
@@ -35,39 +35,39 @@ async function main() {
         methods: {
             editHandler() {
                 this.currentTable = 'edit';
-                this.prevRule = { host: this.host, proxyName: this.activeTab.currentProxy};
+                this.prevRule = { host: this.host, proxyName: this.activeTab.currentProxy };
             },
             saveHandler() {
-                this.currentTable = 'info';
-                console.log(this.prevRule, this.host, this.activeTab.currentProxy)
-                const profile = this.data.profiles[this.activeTab.currentActive.name];
-                let ruleExist = false;
-                for (let rule of profile.rules) {
-                    if (rule.host === this.prevRule.host && rule.proxyName === this.prevRule.proxyName) {
-                        ruleExist = true;
-                        rule.host = this.host;
-                        rule.proxyName = this.activeTab.currentProxy;
-                        break;
+                if (this.currentTable === 'edit') {
+                    // edit rule or push new rule
+                    const profile = this.data.profiles[this.activeTab.currentActive.name];
+                    let ruleExist = false;
+                    for (let rule of profile.rules) {
+                        if (rule.host === this.prevRule.host && rule.proxyName === this.prevRule.proxyName) {
+                            ruleExist = true;
+                            rule.host = this.host;
+                            rule.proxyName = this.activeTab.currentProxy;
+                            break;
+                        }
                     }
+                    if (ruleExist === false) {
+                        profile.rules.push({ host: this.host, proxyName: this.activeTab.currentProxy });
+                    }
+                } else if (this.currentTable === 'switch') {
+                    // just save it, nothing else
                 }
-                if (ruleExist === false) {
-                    profile.rules.push({ host: this.host, proxyName: this.activeTab.currentProxy});
-                }
+
+                this.currentTable = 'info';
                 this.setData();
-                console.log(this.data);
             },
             switchHandler() {
                 this.currentTable = 'switch';
             },
             switchProxy(ev) {
-                console.log(ev.target.value);
                 this.data.active = { name: ev.target.value, type: 'proxy' };
-                this.setData();
             },
             switchProfile(ev) {
-                console.log(ev.target.value);
                 this.data.active = { name: ev.target.value, type: 'profile' };
-                this.setData();
             },
             optionHandler() {
                 browser.tabs.create({ url: './option.html' });
@@ -98,22 +98,36 @@ async function main() {
                 }
             },
             showSaveBtn() {
-                if (this.currentTable === 'edit') {
+                if (this.currentTable === 'edit' || this.currentTable === 'switch') {
                     return true;
                 } else {
                     return false;
                 }
+            },
+            showSwitchBtn() {
+                if (this.currentTable === 'switch') {
+                    return false;
+                } else {
+                    return true;
+                }
+            },
+            activeProxy() {
+                const proxyName = this.data.active.type == 'proxy' ? data.active.name : '';
+                console.log(proxyName);
+                return proxyName;
+            },
+            activeProfile() {
+                const profileName = this.data.active.type == 'profile' ? data.active.name : '';
+                console.log(profileName);
+                return profileName;
             }
         },
         mounted() {
-            console.log(this);
             $('#app').style.display = 'block';
         }
     });
 
     app.mount('#app');
-
-    console.log('show popup');
 }
 
 main();
