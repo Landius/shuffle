@@ -180,7 +180,7 @@ async function main() {
                 browser.runtime.sendMessage({
                     cmd: 'setData',
                     data: JSON.parse(JSON.stringify(this.data))
-                });
+                }).then(()=>alert('applied.'));
             }
         },
         computed: {

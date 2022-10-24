@@ -1,6 +1,7 @@
 :root {
     --content-width: 750px;
     --gray-border: 1px solid #0005;
+    --input-padding: 2px 5px;
     font-size: 14px;
 }
 
@@ -147,7 +148,7 @@ div.hr {
     width: 100%;
     height: 100%;
     box-shadow: inset 0 0 2px 0px #0008;
-    border-radius: 3px;
+    border-radius: 2px;
     pointer-events: none;
 }
 
@@ -209,10 +210,6 @@ input[type="text"],
 input[type="password"],
 textarea {
     box-sizing: border-box;
-    border-radius: 2px;
-    border: var(--gray-border);
-    outline: none;
-    padding: 3px 5px;
     color: #233;
 }
 
@@ -247,7 +244,7 @@ button:active {
 #operation>button {
     margin-left: 1em;
     box-shadow: 1px 1px 1px 0 #0003;
-    padding: 2px 10px;
+    padding: 3px 10px;
 }
 
 #operation>button:active {
@@ -272,7 +269,7 @@ col:nth-child(3) {
 
 th,
 td {
-    padding: 3px 5px;
+    padding: 5px;
     border: var(--gray-border);
 }
 
@@ -282,4 +279,13 @@ td>input[type="button"] {
     font-size: .9rem;
     width: 100%;
     margin: auto;
+}
+
+input,
+select,
+textarea{
+    padding: var(--input-padding);
+    border: var(--gray-border);
+    border-radius: 2px;
+    outline: none;
 }
