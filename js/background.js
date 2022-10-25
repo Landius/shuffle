@@ -153,7 +153,7 @@ function getProxyByUrl(url) {
 }
 
 function proxyAuthHandler(requestDetail) {
-    let blockResponse = null;
+    let blockResponse = {};
     if (requestDetail.isProxy && requestDetail.proxyInfo.type.includes('http')) {
         for (let proxy of g.data.proxies) {
             if (
@@ -161,14 +161,12 @@ function proxyAuthHandler(requestDetail) {
                 proxy.host === requestDetail.proxyInfo.host &&
                 proxy.port === requestDetail.proxyInfo.port
             ) {
-                blockResponse = {
-                    authCredentials: { username: proxy.username, password: proxy.password }
-                };
+                blockResponse.authCredentials = { username: proxy.username, password: proxy.password };
             }
         }
     } else {
-        blockResponse = { cancel: true };
-        log.warn('proxyAuthHandler(), credentials not found.');
+        console.log('proxyAuthHandler(): requestDetail=', requestDetail);
+        log.warn('proxyAuthHandler(): credentials not found.');
     }
     return blockResponse;
 }
