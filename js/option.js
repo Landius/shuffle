@@ -64,6 +64,12 @@ async function main() {
                     host: '',
                     proxyName: ''
                 });
+                setTimeout(() => {
+                    // focus after vue update dom
+                    const input = $('.profile-rule:last-child > input');
+                    input.scrollIntoView();
+                    input.focus();
+                }, 0);
             },
             renameCurrent(ev) {
                 const activeLi = $('#proxy.tab li.active');
@@ -137,19 +143,19 @@ async function main() {
                 }
             },
             // for header editor
-            addRequestModifier(){
-                const newModifier = {pattern:"",name:"",value:"",enable:true};
+            addRequestModifier() {
+                const newModifier = { pattern: '', name: '', value: '', enable: true };
                 this.data.requestModifiers.push(newModifier);
             },
-            addResponseModifier(){
-                const newModifier = {pattern:"",name:"",value:"",enable:true};
+            addResponseModifier() {
+                const newModifier = { pattern: '', name: '', value: '', enable: true };
                 this.data.responseModifiers.push(newModifier);
             },
-            deleteRequestModifier(ev){
+            deleteRequestModifier(ev) {
                 const index = parseInt(ev.target.dataset.index);
                 this.data.requestModifiers.splice(index, 1);
             },
-            deleteResponseModifier(ev){
+            deleteResponseModifier(ev) {
                 const index = parseInt(ev.target.dataset.index);
                 this.data.responseModifiers.splice(index, 1);
             },
@@ -162,32 +168,35 @@ async function main() {
             exportData() {
                 const text = JSON.stringify(this.data, null, 2);
                 const time = new Date();
-                const filename = 'shuffle_data-' + time.getFullYear() + '-' + (time.getMonth()+1) + '-' + time.getDate() + '.json';
+                const filename =
+                    'shuffle_data-' + time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate() + '.json';
                 saveTextFile(text, filename);
             },
-            resetData(){
-                if(confirm('reset extension data?')){
-                    browser.runtime.sendMessage({cmd:'resetData'}).then(()=>window.location.reload());
+            resetData() {
+                if (confirm('reset extension data?')) {
+                    browser.runtime.sendMessage({ cmd: 'resetData' }).then(() => window.location.reload());
                 }
             },
             reload() {
-                if(confirm('will lost all changes, reload page?')){
+                if (confirm('will lost all changes, reload page?')) {
                     window.location.reload();
                 }
             },
             apply() {
                 console.log('save data', JSON.parse(JSON.stringify(this.data)));
-                browser.runtime.sendMessage({
-                    cmd: 'setData',
-                    data: JSON.parse(JSON.stringify(this.data))
-                }).then(()=>alert('applied.'));
+                browser.runtime
+                    .sendMessage({
+                        cmd: 'setData',
+                        data: JSON.parse(JSON.stringify(this.data))
+                    })
+                    .then(() => alert('applied.'));
             }
         },
         computed: {
             proxyNames() {
                 return Object.keys(this.data.proxies);
             },
-            version(){
+            version() {
                 return browser.runtime.getManifest().version;
             }
         },

@@ -3,7 +3,7 @@
   "manifest_version": 2,
   "name": "shuffle",
   "description": "switch proxy, edit header",
-  "version": "1.22",
+  "version": "1.23",
 
   "icons": { "96": "img/icon.png" },
 
