@@ -22,6 +22,7 @@ async function main() {
             activeTab(ev) {
                 const t = ev.target;
                 if (t.classList.contains('active')) return;
+                if (t.classList.contains('tab-btn') == false) return;
                 for (let span of $$('#nav>span.tab-btn')) {
                     span.classList.remove('active');
                 }
