@@ -12,7 +12,9 @@ async function main() {
     const app = createApp({
         data() {
             let host;
-            if (activeTab.url.startsWith('moz-ext')) {
+            if (data.setting.enable_proxy === false) {
+                host = '-';
+            } else if (activeTab.url.startsWith('moz-ext')) {
                 host = 'extension page';
             } else if (activeTab.url.startsWith('about:')) {
                 host = 'about page';
@@ -22,7 +24,9 @@ async function main() {
             }
 
             let status;
-            if (activeTab.currentActive.type === 'profile') {
+            if (data.setting.enable_proxy === false) {
+                status = 'disabled';
+            } else if (activeTab.currentActive.type === 'profile') {
                 status = activeTab.currentActive.name + ' ~ ' + activeTab.currentProxy;
             } else {
                 status = activeTab.currentProxy;
@@ -69,6 +73,15 @@ async function main() {
             switchProfile(ev) {
                 this.data.active = { name: ev.target.value, type: 'profile' };
             },
+            enableHandler(ev) {
+                this.data.setting.enable_proxy = true;
+                browser.runtime
+                    .sendMessage({
+                        cmd: 'setData',
+                        data: JSON.parse(JSON.stringify(this.data))
+                    })
+                    .then(() => window.close());
+            },
             optionHandler() {
                 browser.tabs.create({ url: './option.html' });
                 close();
@@ -87,6 +100,7 @@ async function main() {
         computed: {
             showEditBtn() {
                 if (
+                    this.data.setting.enable_proxy === false ||
                     this.activeTab.url.startsWith('moz-ext') ||
                     this.activeTab.url.startsWith('about:') ||
                     this.activeTab.currentActive.type === 'proxy' ||
@@ -98,6 +112,7 @@ async function main() {
                 }
             },
             showSaveBtn() {
+                if (this.data.setting.enable_proxy === false) return false;
                 if (this.currentTable === 'edit' || this.currentTable === 'switch') {
                     return true;
                 } else {
@@ -105,10 +120,17 @@ async function main() {
                 }
             },
             showSwitchBtn() {
-                if (this.currentTable === 'switch') {
+                if (this.data.setting.enable_proxy === false || this.currentTable === 'switch') {
                     return false;
                 } else {
                     return true;
+                }
+            },
+            showEnableBtn() {
+                if (this.data.setting.enable_proxy === false) {
+                    return true;
+                } else {
+                    return false;
                 }
             },
             activeProxy() {
