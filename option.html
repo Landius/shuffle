@@ -18,6 +18,7 @@
     <div id="app">
         <div id="nav" @click="activeTab">
             <span class="tab-btn active">proxy</span>
+            <span class="tab-btn">url-redirect</span>
             <span class="tab-btn">header-editor</span>
             <span class="tab-btn">setting</span>
             <span class="tab-btn">about</span>
@@ -109,6 +110,30 @@
                     </ul>
                 </div>
             </div>
+            <div id="url-redirect" class="tab">
+                <h4>url redirect</h4>
+                <table>
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                    </colgroup>
+                    <tr>
+                        <th>pattern</th>
+                        <th>target</th>
+                        <th>enable</th>
+                        <th>delete</th>
+                    </tr>
+                    <tr v-for="(redirect, index) in data.urlRedirects">
+                        <td><input type="text" v-model="redirect.pattern"></td>
+                        <td><input type="text" v-model="redirect.target"></td>
+                        <td><input type="checkbox" v-model="redirect.enable"></td>
+                        <td><input type="button" value="delete" @click="deleteUrlRedirect" :data-index="index"></td>
+                    </tr>
+                </table>
+                <input type="button" @click="addUrlRedirect" value="add url redirect">
+            </div>
             <div id="header-editor" class="tab">
                 <h4>Request modifier</h4>
                 <table>
@@ -183,6 +208,11 @@
                 <div>
                     <input type="checkbox" :disabled="!data.setting.enable_proxy" v-model="data.setting.enable_for_extension">
                     proxy requests from extensions.
+                </div>
+                <h4>url redirect</h4>
+                <div>
+                    <input type="checkbox" v-model="data.setting.enable_redirect">
+                    enable url redirect.
                 </div>
                 <h4>Header editor</h4>
                 <div>

@@ -16,6 +16,13 @@ const defaultData = {
             rules: [{ host: 'example.com', proxyName: 'direct' }]
         }
     },
+    urlRedirects: [
+        {
+            pattern: '^https://(example).org/$',
+            target: 'https://$1.com/',
+            enable: true
+        }
+    ],
     requestModifiers: [
         {
             pattern: '^https://example.org/$',
@@ -36,6 +43,7 @@ const defaultData = {
         enable_proxy: true,
         refresh_after_switch: true,
         enable_for_extension: true,
+        enable_redirect: false,
         enable_modifier: false,
         enable_logging: false
     }
@@ -171,6 +179,23 @@ function proxyAuthHandler(requestDetail) {
     return blockResponse;
 }
 
+function applyUrlRedirects(requestDetail) {
+    const url = requestDetail.url;
+    const blockingResponse = {};
+    log.log(`applyUrlRedirects():\n original url: ${url}`);
+
+    for (let redirect of g.data.urlRedirects) {
+        const urlPattern = new RegExp(redirect.pattern);
+        if (redirect.enable && urlPattern.test(url)) {
+            blockingResponse.redirectUrl = url.replace(urlPattern, redirect.target);
+            log.log(`applyUrlRedirects():\n target_url=${blockingResponse.redirectUrl}`);
+            break;
+        }
+    }
+
+    return blockingResponse;
+}
+
 function applyRequestModifiers(requestDetail) {
     const url = requestDetail.url;
     const headers = requestDetail.requestHeaders;
@@ -179,13 +204,13 @@ function applyRequestModifiers(requestDetail) {
         if (modifier.enable && new RegExp(modifier.pattern).test(url)) {
             const i = headers.findIndex(item => item.name.toLowerCase() === modifier.name.toLowerCase());
             if (i === -1) {
-                // header not exist
+                // add header
                 headers.push({ name: modifier.name, value: modifier.value });
             } else if (modifier.value === '') {
                 // delete header
                 headers.splice(i, 1);
             } else {
-                // change value
+                // change header value
                 headers[i].value = modifier.value;
             }
         }
@@ -292,6 +317,7 @@ main();
 function switchListeners() {
     const setting = g.data.setting;
     const proxyEnabled = browser.proxy.onRequest.hasListener(proxyHandler) ? true : false;
+    const redirectEnabled = browser.webRequest.onBeforeRequest.hasListener(applyUrlRedirects) ? true : false;
     const modifierEnabled = browser.webRequest.onBeforeSendHeaders.hasListener(applyRequestModifiers) ? true : false;
     const loggingEnabled = browser.proxy.onError.hasListener(proxyErrorHandler) ? true : false;
 
@@ -314,6 +340,15 @@ function switchListeners() {
         browser.tabs.onActivated.removeListener(updateIcon);
         browser.windows.onFocusChanged.removeListener(updateIcon);
         browser.browserAction.setIcon(icon['NORMAL']);
+    }
+
+    // switch url redirect
+    if (setting.enable_redirect === true && redirectEnabled === false) {
+        // redirect on
+        browser.webRequest.onBeforeRequest.addListener(applyUrlRedirects, { urls: ['<all_urls>'] }, ['blocking']);
+    } else {
+        // redirect off
+        browser.webRequest.onBeforeRequest.removeListener(applyUrlRedirects);
     }
 
     // switch request & response header modifier

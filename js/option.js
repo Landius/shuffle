@@ -4,13 +4,12 @@ const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 async function main() {
-    const storage = browser.storage.sync;
-    let storageData = await storage.get();
+    let appData = await browser.runtime.sendMessage({cmd: 'getData'});
 
     const app = createApp({
         data() {
             return {
-                data: storageData,
+                data: appData,
                 proxyTab: {
                     currentType: '',
                     currentProxyInfo: {},
@@ -142,6 +141,15 @@ async function main() {
                     this.data.profiles[name] = newProfile;
                     setTimeout(() => $('li.profile-item:last-child').click(), 10);
                 }
+            },
+            // for url redirect
+            addUrlRedirect(){
+                const newRedirect = {pattern: '', target: '', enable: false};
+                this.data.urlRedirects.push(newRedirect);
+            },
+            deleteUrlRedirect(ev){
+                const index = parseInt(ev.target.dataset.index);
+                this.data.urlRedirects.splice(index, 1);
             },
             // for header editor
             addRequestModifier() {
