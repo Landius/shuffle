@@ -69,10 +69,7 @@ function updateIcon() {
             log.log('updateIcon() activeTab:', activeTab);
             let currentProxy;
             if (activeTab.url.startsWith('about:')) {
-                currentProxy =
-                    g.data.active.type === 'proxy'
-                        ? g.data.active.name
-                        : g.data.profiles[g.data.active.name].defaultProxy;
+                currentProxy = g.data.active.type === 'proxy' ? g.data.active.name : g.data.profiles[g.data.active.name].defaultProxy;
             } else {
                 currentProxy = getProxyByUrl(activeTab.url).proxyName;
             }
@@ -164,11 +161,7 @@ function proxyAuthHandler(requestDetail) {
     let blockResponse = {};
     if (requestDetail.isProxy && requestDetail.proxyInfo.type.includes('http')) {
         for (let proxy of g.data.proxies) {
-            if (
-                proxy.type === requestDetail.proxyInfo.type &&
-                proxy.host === requestDetail.proxyInfo.host &&
-                proxy.port === requestDetail.proxyInfo.port
-            ) {
+            if (proxy.type === requestDetail.proxyInfo.type && proxy.host === requestDetail.proxyInfo.host && proxy.port === requestDetail.proxyInfo.port) {
                 blockResponse.authCredentials = { username: proxy.username, password: proxy.password };
             }
         }
@@ -185,11 +178,13 @@ function applyUrlRedirects(requestDetail) {
     log.log(`applyUrlRedirects():\n original url: ${url}`);
 
     for (let redirect of g.data.urlRedirects) {
-        const urlPattern = new RegExp(redirect.pattern);
-        if (redirect.enable && urlPattern.test(url)) {
-            blockingResponse.redirectUrl = url.replace(urlPattern, redirect.target);
-            log.log(`applyUrlRedirects():\n target_url=${blockingResponse.redirectUrl}`);
-            break;
+        if (redirect.enable) {
+            const urlPattern = new RegExp(redirect.pattern);
+            if (urlPattern.test(url)) {
+                blockingResponse.redirectUrl = url.replace(urlPattern, redirect.target);
+                log.log(`applyUrlRedirects():\n target_url=${blockingResponse.redirectUrl}`);
+                break;
+            }
         }
     }
 
@@ -354,14 +349,8 @@ function switchListeners() {
     // switch request & response header modifier
     if (setting.enable_modifier === true && modifierEnabled === false) {
         // modifier on
-        browser.webRequest.onBeforeSendHeaders.addListener(applyRequestModifiers, { urls: ['<all_urls>'] }, [
-            'blocking',
-            'requestHeaders'
-        ]);
-        browser.webRequest.onHeadersReceived.addListener(applyResponseModifiers, { urls: ['<all_urls>'] }, [
-            'blocking',
-            'responseHeaders'
-        ]);
+        browser.webRequest.onBeforeSendHeaders.addListener(applyRequestModifiers, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders']);
+        browser.webRequest.onHeadersReceived.addListener(applyResponseModifiers, { urls: ['<all_urls>'] }, ['blocking', 'responseHeaders']);
     } else if (setting.enable_modifier === false && modifierEnabled === true) {
         // modifier off
         browser.webRequest.onBeforeSendHeaders.removeListener(applyRequestModifiers);
